@@ -44,6 +44,14 @@ class App extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+              primary: primaryColor,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              )),
+        ),
       ),
       home: LoginPage(),
     );
