@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../pages/pages.dart';
 
 class App extends StatelessWidget {
+  const App({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
@@ -56,7 +58,7 @@ class App extends StatelessWidget {
               )),
         ),
       ),
-      home: LoginPage(null),
+      home: const LoginPage(null),
     );
   }
 }

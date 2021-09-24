@@ -12,13 +12,11 @@ void main() {
   HttpAdapter sut;
   ClientSpy client;
   String url;
-  Uri uri;
 
   setUp(() {
     client = ClientSpy();
     sut = HttpAdapter(client);
     url = faker.internet.httpUrl();
-    uri = Uri.parse(url);
   });
 
   group('shared', () {

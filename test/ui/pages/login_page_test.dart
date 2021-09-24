@@ -14,31 +14,51 @@ void main() {
   StreamController<String> emailErrorController;
   StreamController<String> passwordErrorController;
   StreamController<bool> isFormValidController;
+  StreamController<bool> isLoadingController;
+  StreamController<String> mainErrorController;
+
+  void initStreams() {
+    emailErrorController = StreamController<String>();
+    passwordErrorController = StreamController<String>();
+    mainErrorController = StreamController<String>();
+    isFormValidController = StreamController<bool>();
+    isLoadingController = StreamController<bool>();
+  }
+
+  void mockStreams() {
+    when(presenter.emailErrorStream)
+        .thenAnswer((_) => emailErrorController.stream);
+    when(presenter.passwordErrorStream)
+        .thenAnswer((_) => passwordErrorController.stream);
+    when(presenter.isFormValidStream)
+        .thenAnswer((_) => isFormValidController.stream);
+    when(presenter.isLoadingController)
+        .thenAnswer((_) => isLoadingController.stream);
+    when(presenter.mainErrorController)
+        .thenAnswer((_) => mainErrorController.stream);
+  }
+
+  void closeStreams() {
+    emailErrorController.close();
+    passwordErrorController.close();
+    isFormValidController.close();
+    isLoadingController.close();
+    mainErrorController.close();
+  }
 
   Future<void> loadPage(WidgetTester tester) async {
     presenter = LoginPresenterSpy();
-
-    emailErrorController = StreamController<String>();
-    when(presenter.emailErrorStream)
-        .thenAnswer((_) => emailErrorController.stream);
-
-    passwordErrorController = StreamController<String>();
-    when(presenter.passwordErrorStream)
-        .thenAnswer((_) => passwordErrorController.stream);
-
-    isFormValidController = StreamController<bool>();
-    when(presenter.isFormValidStream)
-        .thenAnswer((_) => isFormValidController.stream);
+    initStreams();
+    mockStreams();
 
     final loginPage = MaterialApp(home: LoginPage(presenter));
     await tester.pumpWidget(loginPage);
   }
 
   tearDown(() {
-    emailErrorController.close();
-    passwordErrorController.close();
-    isFormValidController.close();
+    closeStreams();
   });
+
   testWidgets('Should load with correct initial state',
       (WidgetTester tester) async {
     await loadPage(tester);
@@ -64,6 +84,7 @@ void main() {
     // E retornamos um widget e assim podemos usar a propriedade onPressed do button
     final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
     expect(button.onPressed, null);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('Should call validate with correct value',
@@ -201,5 +222,41 @@ void main() {
     await tester.pump();
 
     verify(presenter.auth()).called(1);
+  });
+
+  testWidgets('Should present loading', (WidgetTester tester) async {
+    await loadPage(tester);
+
+    isLoadingController.add(true);
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+  testWidgets('Should hide loading', (WidgetTester tester) async {
+    await loadPage(tester);
+
+    isLoadingController.add(true);
+    await tester.pump();
+    isLoadingController.add(false);
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+  testWidgets('Should present error message if authentication fails',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+
+    mainErrorController.add('main error');
+    await tester.pump();
+
+    expect(find.text('main error'), findsOneWidget);
+  });
+
+  testWidgets('Should close streams on dispose', (WidgetTester tester) async {
+    await loadPage(tester);
+
+    addTearDown(() {
+      verify(presenter.dispose()).called(1);
+    });
   });
 }

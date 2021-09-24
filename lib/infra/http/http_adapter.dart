@@ -10,6 +10,7 @@ class HttpAdapter implements HttpClient {
 
   HttpAdapter(this.client);
 
+  @override
   Future<Map> request(
       {@required String url, @required method, Map body}) async {
     final headers = {
